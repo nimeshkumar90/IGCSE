@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bubble Sort — Interactive Learning Lab</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=DM+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f1a;
+    --surface: #161929;
+    --surface2: #1e2338;
+    --border: #2a3050;
+    --text: #e2e8f8;
+    --text-muted: #8892b0;
+    --accent: #4f9eff;
+    --accent2: #7b5ea7;
+    --compare: #f59e0b;
+    --swap: #ef4444;
+    --sorted: #22c55e;
+    --normal: #3b5bdb;
+    --highlight-line: #2a3050;
+    --pseudo-bg: #0d0f1a;
+    --font-code: 'JetBrains Mono', monospace;
+    --font-body: 'DM Sans', sans-serif;
+    --font-heading: 'Space Grotesk', sans-serif;
+    --radius: 10px;
+    --shadow: 0 4px 24px rgba(0,0,0,0.4);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* HEADER */
+  header {
+    background: linear-gradient(135deg, #0d0f1a 0%, #161929 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 18px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(12px);
+  }
+  .logo {
+    font-family: var(--font-heading);
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: -0.5px;
+  }
+  .logo span { color: var(--text-muted); font-weight: 400; }
+  .mode-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+  .toggle-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 4px;
+    display: flex;
+    cursor: pointer;
+  }
+  .toggle-opt {
+    padding: 4px 14px;
+    border-radius: 16px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    font-family: var(--font-heading);
+    transition: all 0.2s;
+    color: var(--text-muted);
+    cursor: pointer;
+  }
+  .toggle-opt.active {
+    background: var(--accent);
+    color: #fff;
+  }
+  nav {
+    display: flex;
+    gap: 4px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 4px;
+  }
+  .nav-btn {
+    padding: 6px 16px;
+    border-radius: 6px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .nav-btn.active, .nav-btn:hover { background: var(--surface); color: var(--text); }
+  .nav-btn.active { color: var(--accent); }
+
+  /* PAGES */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* MAIN LAYOUT */
+  main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 24px 20px;
+  }
+
+  /* INPUT PANEL */
+  .input-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: flex-end;
+  }
+  .input-group { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 200px; }
+  .input-group label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    font-family: var(--font-heading);
+  }
+  .input-group input {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: var(--font-code);
+    font-size: 0.9rem;
+    padding: 10px 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .input-group input:focus { border-color: var(--accent); }
+  .input-group input.error { border-color: var(--swap); }
+  .error-msg { color: var(--swap); font-size: 0.75rem; margin-top: 4px; min-height: 16px; }
+  .btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: #3b8fe8; }
+  .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-ghost { background: transparent; color: var(--text-muted); border: 1px solid var(--border); }
+  .btn-ghost:hover { color: var(--text); border-color: var(--text-muted); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .options-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    user-select: none;
+  }
+  .checkbox-label input[type="checkbox"] { accent-color: var(--accent); width: 16px; height: 16px; }
+
+  /* GRID */
+  .sim-grid {
+    display: grid;
+    grid-template-columns: 1fr 260px;
+    grid-template-rows: auto auto;
+    gap: 16px;
+  }
+  @media (max-width: 900px) {
+    .sim-grid { grid-template-columns: 1fr; }
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+  }
+  .card-title {
+    font-family: var(--font-heading);
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-title .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  /* VISUALIZER */
+  .visualizer-card { grid-column: 1; }
+  #bar-container {
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+    height: 220px;
+    padding: 0 4px;
+    margin-bottom: 12px;
+  }
+  .bar-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    height: 100%;
+    justify-content: flex-end;
+  }
+  .bar {
+    width: 100%;
+    border-radius: 6px 6px 0 0;
+    transition: height 0.3s ease, background 0.25s;
+    background: var(--normal);
+    position: relative;
+    min-height: 8px;
+  }
+  .bar.comparing { background: var(--compare); box-shadow: 0 0 12px rgba(245,158,11,0.5); }
+  .bar.swapping { background: var(--swap); box-shadow: 0 0 12px rgba(239,68,68,0.5); }
+  .bar.sorted { background: var(--sorted); }
+  .bar-label {
+    font-family: var(--font-code);
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+  .bar-val {
+    font-family: var(--font-code);
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  /* LEGEND */
+  .legend {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-family: var(--font-heading);
+  }
+  .legend-dot {
+    width: 12px; height: 12px;
+    border-radius: 3px;
+  }
+
+  /* CONTROLS */
+  .controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+  }
+  .speed-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    font-family: var(--font-heading);
+    margin-left: auto;
+  }
+  input[type="range"] {
+    accent-color: var(--accent);
+    width: 90px;
+  }
+
+  /* STATS */
+  .stats-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+  }
+  .stat-pill {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 0.78rem;
+    font-family: var(--font-heading);
+    color: var(--text-muted);
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+  .stat-pill strong {
+    color: var(--accent);
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  /* PSEUDOCODE */
+  .pseudo-card {
+    grid-column: 2;
+    grid-row: 1 / 3;
+    position: relative;
+  }
+  @media (max-width: 900px) {
+    .pseudo-card { grid-column: 1; grid-row: auto; }
+  }
+  .pseudo-lines {
+    font-family: var(--font-code);
+    font-size: 0.75rem;
+    line-height: 1.9;
+    color: #8892b0;
+  }
+  .pseudo-line {
+    padding: 2px 8px;
+    border-radius: 4px;
+    transition: all 0.2s;
+    white-space: pre;
+    display: block;
+    border-left: 3px solid transparent;
+  }
+  .pseudo-line.active {
+    background: rgba(79,158,255,0.15);
+    color: var(--text);
+    border-left-color: var(--accent);
+  }
+  .pseudo-line.executed {
+    color: #5a6585;
+  }
+
+  /* EXPLANATION */
+  .explanation-card { grid-column: 1; }
+  #explanation-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-size: 0.88rem;
+    line-height: 1.6;
+    color: var(--text);
+    min-height: 60px;
+  }
+  #explanation-box .step-tag {
+    font-family: var(--font-code);
+    background: rgba(79,158,255,0.15);
+    color: var(--accent);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 0.75rem;
+    margin-right: 6px;
+  }
+
+  /* TRACE TABLE */
+  .trace-section {
+    margin-top: 20px;
+  }
+  .trace-table-wrap {
+    overflow-x: auto;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--font-code);
+    font-size: 0.78rem;
+  }
+  th {
+    background: var(--surface2);
+    color: var(--text-muted);
+    padding: 8px 12px;
+    text-align: left;
+    font-weight: 600;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  td {
+    padding: 7px 12px;
+    border-bottom: 1px solid rgba(42,48,80,0.5);
+    color: var(--text);
+    white-space: nowrap;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr.highlight-row td { background: rgba(79,158,255,0.1); }
+  tr.swap-row td { background: rgba(239,68,68,0.08); }
+  .tag {
+    display: inline-block;
+    padding: 1px 7px;
+    border-radius: 4px;
+    font-size: 0.68rem;
+    font-weight: 700;
+  }
+  .tag-swap { background: rgba(239,68,68,0.2); color: var(--swap); }
+  .tag-compare { background: rgba(245,158,11,0.2); color: var(--compare); }
+  .tag-sorted { background: rgba(34,197,94,0.2); color: var(--sorted); }
+
+  /* ASSIGNMENT PAGE */
+  .assign-header {
+    padding: 32px 0 24px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 28px;
+  }
+  .assign-header h1 {
+    font-family: var(--font-heading);
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .assign-header p { color: var(--text-muted); font-size: 0.95rem; }
+  .q-section-title {
+    font-family: var(--font-heading);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    margin: 28px 0 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+  .question-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin-bottom: 14px;
+  }
+  .q-number {
+    font-family: var(--font-code);
+    font-size: 0.7rem;
+    color: var(--accent);
+    font-weight: 700;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .q-text {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 14px;
+    color: var(--text);
+  }
+  .q-text code {
+    font-family: var(--font-code);
+    background: var(--surface2);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+  }
+  .mc-options { display: flex; flex-direction: column; gap: 8px; }
+  .mc-opt {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.88rem;
+    background: var(--surface2);
+  }
+  .mc-opt:hover { border-color: var(--accent); }
+  .mc-opt input[type="radio"] { accent-color: var(--accent); }
+  .mc-opt.correct { border-color: var(--sorted); background: rgba(34,197,94,0.1); }
+  .mc-opt.wrong { border-color: var(--swap); background: rgba(239,68,68,0.1); }
+  .fitb-input {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: var(--font-code);
+    font-size: 0.9rem;
+    padding: 8px 12px;
+    outline: none;
+    width: 160px;
+    transition: border-color 0.2s;
+  }
+  .fitb-input:focus { border-color: var(--accent); }
+  .fitb-input.correct { border-color: var(--sorted); }
+  .fitb-input.wrong { border-color: var(--swap); }
+  .check-btn {
+    padding: 8px 18px;
+    border-radius: 6px;
+    border: none;
+    background: var(--accent);
+    color: #fff;
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 0.82rem;
+    cursor: pointer;
+    margin-top: 12px;
+    transition: background 0.2s;
+  }
+  .check-btn:hover { background: #3b8fe8; }
+  .answer-reveal {
+    margin-top: 10px;
+    background: var(--surface2);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    display: none;
+    border-left: 3px solid var(--sorted);
+    color: var(--text);
+  }
+  .answer-reveal.show { display: block; }
+  .reveal-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-muted);
+    font-family: var(--font-heading);
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 6px 14px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: all 0.2s;
+  }
+  .reveal-btn:hover { color: var(--text); border-color: var(--text-muted); }
+  .score-banner {
+    background: linear-gradient(135deg, rgba(79,158,255,0.15), rgba(123,94,167,0.15));
+    border: 1px solid var(--accent);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    text-align: center;
+    margin-top: 24px;
+    display: none;
+  }
+  .score-banner.show { display: block; }
+  .score-banner h2 { font-family: var(--font-heading); font-size: 1.5rem; margin-bottom: 4px; }
+  .score-banner p { color: var(--text-muted); }
+  .assign-controls { display: flex; gap: 10px; margin-top: 20px; }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  /* Complete animation */
+  @keyframes pop { 0%{transform:scale(1)} 50%{transform:scale(1.04)} 100%{transform:scale(1)} }
+  .complete { animation: pop 0.3s ease; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">BubbleSort <span>Learning Lab</span></div>
+  <nav>
+    <button class="nav-btn active" onclick="showPage('sim')">🔬 Simulation</button>
+    <button class="nav-btn" onclick="showPage('assign')">📝 Assignment</button>
+  </nav>
+  <div class="mode-toggle">
+    Mode:
+    <div class="toggle-btn">
+      <div class="toggle-opt active" id="mode-beginner" onclick="setMode('beginner')">Beginner</div>
+      <div class="toggle-opt" id="mode-advanced" onclick="setMode('advanced')">Advanced</div>
+    </div>
+  </div>
+</header>
+
+<!-- SIMULATION PAGE -->
+<div class="page active" id="page-sim">
+<main>
+  <!-- Input -->
+  <div class="input-panel">
+    <div class="input-group" style="flex:2">
+      <label>Enter numbers (up to 10, comma-separated)</label>
+      <input type="text" id="num-input" placeholder="e.g. 64, 25, 12, 22, 11" maxlength="60">
+      <div class="error-msg" id="input-error"></div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start;padding-top:22px">
+      <button class="btn btn-primary" onclick="loadArray()">▶ Load</button>
+      <button class="btn btn-secondary" onclick="randomArray()">🎲 Random</button>
+      <button class="btn btn-ghost" onclick="resetSim()">↺ Reset</button>
+    </div>
+    <div class="options-row" style="align-self:flex-start;padding-top:22px">
+      <label class="checkbox-label">
+        <input type="checkbox" id="opt-check"> Optimized (early stop)
+      </label>
+    </div>
+  </div>
+
+  <!-- Sim Grid -->
+  <div class="sim-grid">
+    <!-- Visualizer -->
+    <div class="card visualizer-card">
+      <div class="card-title"><span class="dot"></span>Array Visualizer</div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--normal)"></div>Unsorted</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--compare)"></div>Comparing</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--swap)"></div>Swapping</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--sorted)"></div>Sorted</div>
+      </div>
+      <div id="bar-container"></div>
+
+      <div class="stats-row">
+        <div class="stat-pill">Pass <strong id="stat-pass">—</strong></div>
+        <div class="stat-pill">Comparisons <strong id="stat-comp">0</strong></div>
+        <div class="stat-pill">Swaps <strong id="stat-swaps">0</strong></div>
+        <div class="stat-pill" id="stat-status" style="color:var(--text-muted)">Ready</div>
+      </div>
+
+      <div class="controls">
+        <button class="btn btn-secondary" id="btn-prev" onclick="prevStep()" disabled>◀◀ Prev</button>
+        <button class="btn btn-primary" id="btn-play" onclick="togglePlay()" disabled>▶ Play</button>
+        <button class="btn btn-secondary" id="btn-next" onclick="nextStep()" disabled>Next ▶▶</button>
+        <div class="speed-wrap">
+          🐢 Speed 🐇
+          <input type="range" id="speed-slider" min="1" max="5" value="3" oninput="updateSpeed()">
+          <span id="speed-label">Normal</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pseudocode -->
+    <div class="card pseudo-card">
+      <div class="card-title"><span class="dot" style="background:var(--accent2)"></span>Pseudocode</div>
+      <div class="pseudo-lines" id="pseudo-display"></div>
+    </div>
+
+    <!-- Explanation -->
+    <div class="card explanation-card">
+      <div class="card-title"><span class="dot" style="background:var(--compare)"></span>Step Explanation</div>
+      <div id="explanation-box"><span style="color:var(--text-muted)">Load an array to begin the simulation…</span></div>
+    </div>
+  </div>
+
+  <!-- Trace Table -->
+  <div class="trace-section">
+    <div class="card">
+      <div class="card-title"><span class="dot" style="background:var(--sorted)"></span>Live Trace Table</div>
+      <div class="trace-table-wrap">
+        <table id="trace-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Pass</th>
+              <th>Index</th>
+              <th>Action</th>
+              <th>Array State</th>
+              <th>Swap?</th>
+            </tr>
+          </thead>
+          <tbody id="trace-body">
+            <tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:20px">Load an array to see trace data</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>
+</div>
+
+<!-- ASSIGNMENT PAGE -->
+<div class="page" id="page-assign">
+<main>
+  <div class="assign-header">
+    <h1>📝 Bubble Sort Assignment</h1>
+    <p>Test your understanding with these questions on Bubble Sort concepts.</p>
+  </div>
+
+  <div class="q-section-title">Section A — Multiple Choice</div>
+
+  <!-- Q1 -->
+  <div class="question-card">
+    <div class="q-number">Question 1 · Multiple Choice</div>
+    <div class="q-text">How many passes does Bubble Sort need to guarantee sorting an array of <code>n</code> elements?</div>
+    <div class="mc-options">
+      <label class="mc-opt"><input type="radio" name="q1" value="a"> A) 1 pass</label>
+      <label class="mc-opt"><input type="radio" name="q1" value="b"> B) n passes</label>
+      <label class="mc-opt"><input type="radio" name="q1" value="c"> C) n − 1 passes</label>
+      <label class="mc-opt"><input type="radio" name="q1" value="d"> D) n / 2 passes</label>
+    </div>
+    <button class="check-btn" onclick="checkMC('q1','c',this)">Check Answer</button>
+    <div class="answer-reveal" id="ans-q1">✅ <strong>C — n − 1 passes.</strong> After each pass, the largest unsorted element is placed in its final position. So after n − 1 passes, all elements are in their correct positions.</div>
+  </div>
+
+  <!-- Q2 -->
+  <div class="question-card">
+    <div class="q-number">Question 2 · Multiple Choice</div>
+    <div class="q-text">Given the array <code>[3, 1, 4, 1, 5]</code>, after the <strong>first pass</strong> of Bubble Sort, what will the array look like?</div>
+    <div class="mc-options">
+      <label class="mc-opt"><input type="radio" name="q2" value="a"> A) [1, 1, 3, 4, 5]</label>
+      <label class="mc-opt"><input type="radio" name="q2" value="b"> B) [1, 3, 1, 4, 5]</label>
+      <label class="mc-opt"><input type="radio" name="q2" value="c"> C) [3, 1, 1, 4, 5]</label>
+      <label class="mc-opt"><input type="radio" name="q2" value="d"> D) [1, 3, 4, 1, 5]</label>
+    </div>
+    <button class="check-btn" onclick="checkMC('q2','b',this)">Check Answer</button>
+    <div class="answer-reveal" id="ans-q2">✅ <strong>B — [1, 3, 1, 4, 5].</strong> Pass 1: compare 3&1 → swap → [1,3,4,1,5]; compare 3&4 → no swap; compare 4&1 → swap → [1,3,1,4,5]; compare 4&5 → no swap. Final: [1,3,1,4,5].</div>
+  </div>
+
+  <!-- Q3 -->
+  <div class="question-card">
+    <div class="q-number">Question 3 · Multiple Choice</div>
+    <div class="q-text">What is the <strong>worst-case</strong> number of comparisons for Bubble Sort on an array of <code>n</code> elements?</div>
+    <div class="mc-options">
+      <label class="mc-opt"><input type="radio" name="q3" value="a"> A) n</label>
+      <label class="mc-opt"><input type="radio" name="q3" value="b"> B) n²</label>
+      <label class="mc-opt"><input type="radio" name="q3" value="c"> C) n(n−1)/2</label>
+      <label class="mc-opt"><input type="radio" name="q3" value="d"> D) n log n</label>
+    </div>
+    <button class="check-btn" onclick="checkMC('q3','c',this)">Check Answer</button>
+    <div class="answer-reveal" id="ans-q3">✅ <strong>C — n(n−1)/2.</strong> In the worst case (reverse-sorted array), Pass 1 makes n−1 comparisons, Pass 2 makes n−2, … totalling n(n−1)/2 ≈ O(n²).</div>
+  </div>
+
+  <!-- Q4 -->
+  <div class="question-card">
+    <div class="q-number">Question 4 · Multiple Choice</div>
+    <div class="q-text">In the <strong>optimised</strong> Bubble Sort, the algorithm stops early when:</div>
+    <div class="mc-options">
+      <label class="mc-opt"><input type="radio" name="q4" value="a"> A) Half the elements are sorted</label>
+      <label class="mc-opt"><input type="radio" name="q4" value="b"> B) No swaps occur in a complete pass</label>
+      <label class="mc-opt"><input type="radio" name="q4" value="c"> C) The middle element is in place</label>
+      <label class="mc-opt"><input type="radio" name="q4" value="d"> D) The array length reaches 1</label>
+    </div>
+    <button class="check-btn" onclick="checkMC('q4','b',this)">Check Answer</button>
+    <div class="answer-reveal" id="ans-q4">✅ <strong>B — No swaps occur in a complete pass.</strong> If a full pass completes with no swaps, the array is already sorted and further passes are unnecessary. The <code>Swap ← FALSE</code> flag tracks this.</div>
+  </div>
+
+  <!-- Q5 -->
+  <div class="question-card">
+    <div class="q-number">Question 5 · Multiple Choice</div>
+    <div class="q-text">After each pass of Bubble Sort, which element is guaranteed to be in its final correct position?</div>
+    <div class="mc-options">
+      <label class="mc-opt"><input type="radio" name="q5" value="a"> A) The smallest remaining element</label>
+      <label class="mc-opt"><input type="radio" name="q5" value="b"> B) The first element</label>
+      <label class="mc-opt"><input type="radio" name="q5" value="c"> C) The largest remaining unsorted element</label>
+      <label class="mc-opt"><input type="radio" name="q5" value="d"> D) The middle element</label>
+    </div>
+    <button class="check-btn" onclick="checkMC('q5','c',this)">Check Answer</button>
+    <div class="answer-reveal" id="ans-q5">✅ <strong>C — The largest remaining unsorted element.</strong> Each pass "bubbles up" the largest value to the end of the unsorted portion, hence the name Bubble Sort.</div>
+  </div>
+
+  <div class="q-section-title">Section B — Fill in the Blanks</div>
+
+  <!-- Q6 -->
+  <div class="question-card">
+    <div class="q-number">Question 6 · Fill in the Blank</div>
+    <div class="q-text">For an array of 6 elements, the maximum number of swaps that can occur during the entire Bubble Sort is <input class="fitb-input" id="q6" placeholder="?"> swaps.</div>
+    <button class="check-btn" onclick="checkFITB('q6',['15'],this)">Check</button>
+    <div class="answer-reveal" id="ans-q6">✅ <strong>15 swaps.</strong> Maximum swaps = n(n−1)/2 = 6×5/2 = 15 (occurs when array is fully reversed).</div>
+  </div>
+
+  <!-- Q7 -->
+  <div class="question-card">
+    <div class="q-number">Question 7 · Fill in the Blank</div>
+    <div class="q-text">In the pseudocode, the variable <code>Swap</code> is set to <input class="fitb-input" id="q7" placeholder="?"> at the start of each pass.</div>
+    <button class="check-btn" onclick="checkFITB('q7',['false','FALSE'],this)">Check</button>
+    <div class="answer-reveal" id="ans-q7">✅ <strong>FALSE.</strong> <code>Swap ← FALSE</code> is set at the beginning of each pass. If any swap occurs during the pass it becomes TRUE, otherwise the loop ends early.</div>
+  </div>
+
+  <!-- Q8 -->
+  <div class="question-card">
+    <div class="q-number">Question 8 · Fill in the Blank</div>
+    <div class="q-text">The temporary variable used during a swap (e.g. <code>Temp ← Temperature[Index]</code>) ensures that the original value is not <input class="fitb-input" id="q8" placeholder="?"> during the swap.</div>
+    <button class="check-btn" onclick="checkFITB('q8',['lost','overwritten','deleted'],this)">Check</button>
+    <div class="answer-reveal" id="ans-q8">✅ <strong>Lost / Overwritten.</strong> Without a temp variable, assigning <code>A ← B</code> would destroy A's original value before it can be placed into B.</div>
+  </div>
+
+  <div class="q-section-title">Section C — Trace Questions</div>
+
+  <!-- Q9 -->
+  <div class="question-card">
+    <div class="q-number">Question 9 · Trace</div>
+    <div class="q-text">
+      Trace Bubble Sort on the array <code>[9, 5, 2, 7]</code>.<br><br>
+      How many <strong>total swaps</strong> occur across all passes?
+      <br><br>
+      <input class="fitb-input" id="q9" placeholder="Number of swaps">
+    </div>
+    <button class="check-btn" onclick="checkFITB('q9',['4'],this)">Check</button>
+    <div class="answer-reveal" id="ans-q9">
+      ✅ <strong>4 swaps.</strong><br>
+      Pass 1: [9,5,2,7] → swap 9&5 → [5,9,2,7] → swap 9&2 → [5,2,9,7] → swap 9&7 → [5,2,7,9] (3 swaps)<br>
+      Pass 2: [5,2,7,9] → swap 5&2 → [2,5,7,9] (1 swap)<br>
+      Pass 3: [2,5,7,9] → no swaps → done<br>
+      Total = <strong>4 swaps</strong>.
+    </div>
+  </div>
+
+  <!-- Q10 -->
+  <div class="question-card">
+    <div class="q-number">Question 10 · Trace</div>
+    <div class="q-text">
+      The array <code>[1, 2, 3, 4, 5]</code> is already sorted.<br>
+      In the <strong>optimised</strong> Bubble Sort, how many passes will be performed before the algorithm stops?
+      <br><br>
+      <input class="fitb-input" id="q10" placeholder="Number of passes">
+    </div>
+    <button class="check-btn" onclick="checkFITB('q10',['1'],this)">Check</button>
+    <div class="answer-reveal" id="ans-q10">✅ <strong>1 pass.</strong> The optimised version runs a single pass, finds no swaps (Swap stays FALSE), and terminates immediately. This is the best-case O(n) performance.</div>
+  </div>
+
+  <div class="assign-controls">
+    <button class="btn btn-primary" onclick="showAllAnswers()">📖 Reveal All Answers</button>
+    <button class="btn btn-ghost" onclick="resetAssign()">↺ Reset Assignment</button>
+  </div>
+  <div class="score-banner" id="score-banner">
+    <h2 id="score-text">🎉 Well done!</h2>
+    <p id="score-sub">Keep practising to master Bubble Sort.</p>
+  </div>
+</main>
+</div>
+
+<script>
+// ─── STATE ───────────────────────────────────────────────
+let arr = [];
+let steps = [];
+let stepIdx = 0;
+let playing = false;
+let playTimer = null;
+let mode = 'beginner';
+let totalComp = 0, totalSwap = 0;
+let traceCount = 0;
+
+const speedMap = {1:1600, 2:900, 3:500, 4:250, 5:100};
+const speedLabels = {1:'Slowest',2:'Slow',3:'Normal',4:'Fast',5:'Fastest'};
+function getSpeed() {
+  const v = +document.getElementById('speed-slider').value;
+  return mode === 'beginner' ? speedMap[Math.max(1,v-1)] : speedMap[v];
+}
+
+// ─── PSEUDOCODE ──────────────────────────────────────────
+const pseudoLines = [
+  {id:0, text:'First ← 1'},
+  {id:1, text:'Last ← 10'},
+  {id:2, text:'REPEAT'},
+  {id:3, text:'   Swap ← FALSE'},
+  {id:4, text:'   FOR Index ← First TO Last − 1'},
+  {id:5, text:'      IF Arr[Index] > Arr[Index+1]'},
+  {id:6, text:'         THEN'},
+  {id:7, text:'            Temp ← Arr[Index]'},
+  {id:8, text:'            Arr[Index] ← Arr[Index+1]'},
+  {id:9, text:'            Arr[Index+1] ← Temp'},
+  {id:10, text:'            Swap ← TRUE'},
+  {id:11, text:'      ENDIF'},
+  {id:12, text:'   NEXT Index'},
+  {id:13, text:'   Last ← Last − 1'},
+  {id:14, text:'UNTIL (NOT Swap) OR Last = 1'},
+];
+
+function renderPseudo(activeLine=-1, executedLines=[]) {
+  const el = document.getElementById('pseudo-display');
+  el.innerHTML = pseudoLines.map(l => {
+    let cls = 'pseudo-line';
+    if (l.id === activeLine) cls += ' active';
+    else if (executedLines.includes(l.id)) cls += ' executed';
+    return `<span class="${cls}">${l.text}</span>`;
+  }).join('');
+}
+renderPseudo();
+
+// ─── STEP GENERATOR ──────────────────────────────────────
+function generateSteps(a, optimised) {
+  const s = [];
+  let arr2 = [...a];
+  let last = arr2.length - 1;
+  let pass = 0;
+  const sorted = new Set();
+
+  s.push({type:'init', arr:[...arr2], pseudo:[0,1], explain:'Set First = 1 and Last = n. Prepare to start sorting.', pass:0, idx:null, comp:0, swap:0, swapFlag:false});
+
+  while (last >= 1) {
+    pass++;
+    let didSwap = false;
+    s.push({type:'pass-start', arr:[...arr2], pseudo:[2,3], explain:`Pass ${pass} begins. Swap flag set to FALSE.`, pass, idx:null, comp:0, swap:0, swapFlag:false});
+
+    for (let i = 0; i < last; i++) {
+      s.push({type:'compare', arr:[...arr2], pseudo:[4,5], explain:`Comparing Arr[${i}] = ${arr2[i]} and Arr[${i+1}] = ${arr2[i+1]}. Is ${arr2[i]} > ${arr2[i+1]}?`, pass, idx:i, comp:1, swap:0, swapFlag:didSwap, sorted:[...sorted]});
+      if (arr2[i] > arr2[i+1]) {
+        let tmp = arr2[i]; arr2[i] = arr2[i+1]; arr2[i+1] = tmp;
+        didSwap = true;
+        s.push({type:'swap', arr:[...arr2], pseudo:[6,7,8,9,10], explain:`Yes! ${arr2[i+1]} > ${arr2[i]}, so swap them. Temp saves the value, then values are exchanged. Swap ← TRUE.`, pass, idx:i, comp:0, swap:1, swapFlag:true, sorted:[...sorted]});
+      } else {
+        s.push({type:'no-swap', arr:[...arr2], pseudo:[5,11], explain:`No swap needed. ${arr2[i]} ≤ ${arr2[i+1]}, so they are already in order.`, pass, idx:i, comp:0, swap:0, swapFlag:didSwap, sorted:[...sorted]});
+      }
+    }
+    sorted.add(last);
+    last--;
+    s.push({type:'pass-end', arr:[...arr2], pseudo:[12,13,14], explain:`End of Pass ${pass}. The largest unsorted element is now in its final position (shown in green). Last ← Last − 1.${optimised && !didSwap ? ' No swaps occurred → array is sorted! Stopping early.' : ''}`, pass, idx:null, comp:0, swap:0, swapFlag:didSwap, sorted:[...sorted]});
+
+    if (optimised && !didSwap) break;
+  }
+  // Mark all as sorted
+  for (let i = 0; i < arr2.length; i++) sorted.add(i);
+  s.push({type:'done', arr:[...arr2], pseudo:[], explain:'🎉 Array is fully sorted! All elements are in ascending order.', pass, idx:null, comp:0, swap:0, swapFlag:false, sorted:[...sorted]});
+  return s;
+}
+
+// ─── RENDER BARS ─────────────────────────────────────────
+function renderBars(step) {
+  const container = document.getElementById('bar-container');
+  if (!step) { container.innerHTML=''; return; }
+  const a = step.arr;
+  const max = Math.max(...a, 1);
+  container.innerHTML = a.map((v,i) => {
+    const h = Math.max(8, Math.round((v / max) * 190));
+    let cls = 'bar';
+    const sorted = step.sorted || new Set();
+    if (step.type === 'swap' && (i === step.idx || i === step.idx+1)) cls += ' swapping';
+    else if (step.type === 'compare' && (i === step.idx || i === step.idx+1)) cls += ' comparing';
+    else if (sorted.has ? sorted.has(i) : sorted.includes?.(i)) cls += ' sorted';
+    return `<div class="bar-wrap">
+      <div class="bar ${cls}" style="height:${h}px" title="${v}"></div>
+      <div class="bar-val">${v}</div>
+    </div>`;
+  }).join('');
+}
+
+// ─── TRACE TABLE ─────────────────────────────────────────
+function addTraceRow(step, idx) {
+  traceCount++;
+  const body = document.getElementById('trace-body');
+  const arr2 = step.arr;
+  let action = '';
+  let tag = '';
+  if (step.type === 'compare') { action = `Compare [${step.idx}] & [${step.idx+1}]`; tag = `<span class="tag tag-compare">Compare</span>`; }
+  else if (step.type === 'swap') { action = `Swap [${step.idx}] & [${step.idx+1}]`; tag = `<span class="tag tag-swap">Swap</span>`; }
+  else if (step.type === 'no-swap') { action = `No swap`; tag = ''; }
+  else if (step.type === 'pass-start') { action = `Pass ${step.pass} Start`; }
+  else if (step.type === 'pass-end') { action = `Pass ${step.pass} End`; tag = `<span class="tag tag-sorted">Pass Done</span>`; }
+  else if (step.type === 'done') { action = `Sorted!`; tag = `<span class="tag tag-sorted">✓ Done</span>`; }
+  else action = 'Init';
+
+  const arrStr = `[${arr2.join(', ')}]`;
+  const row = document.createElement('tr');
+  if (step.type === 'swap') row.classList.add('swap-row');
+  if (idx === stepIdx) row.classList.add('highlight-row');
+  row.innerHTML = `<td>${traceCount}</td><td>${step.pass||'—'}</td><td>${step.idx!==null?step.idx:'—'}</td><td>${tag} ${action}</td><td style="font-family:var(--font-code)">${arrStr}</td><td>${step.swap>0?'Yes':'No'}</td>`;
+  // Remove empty placeholder
+  const placeholder = body.querySelector('td[colspan]');
+  if (placeholder) body.innerHTML = '';
+  body.appendChild(row);
+  row.scrollIntoView({block:'nearest'});
+}
+
+// ─── APPLY STEP ──────────────────────────────────────────
+function applyStep(step) {
+  renderBars(step);
+  renderPseudo(step.pseudo?.[0] ?? -1, step.pseudo || []);
+
+  // Explanation
+  const exBox = document.getElementById('explanation-box');
+  const tag = step.type === 'swap' ? 'SWAP' : step.type === 'compare' ? 'COMPARE' : step.type === 'pass-end' ? 'PASS END' : step.type === 'done' ? 'DONE' : 'INFO';
+  exBox.innerHTML = `<span class="step-tag">${tag}</span>${step.explain}`;
+
+  // Stats
+  totalComp += step.comp || 0;
+  totalSwap += step.swap || 0;
+  document.getElementById('stat-pass').textContent = step.pass || '—';
+  document.getElementById('stat-comp').textContent = totalComp;
+  document.getElementById('stat-swaps').textContent = totalSwap;
+  const status = document.getElementById('stat-status');
+  if (step.type === 'done') { status.textContent = '✅ Complete'; status.style.color = 'var(--sorted)'; }
+  else { status.textContent = `Step ${stepIdx+1} / ${steps.length}`; status.style.color = 'var(--text-muted)'; }
+
+  addTraceRow(step, stepIdx);
+}
+
+// ─── CONTROLS ────────────────────────────────────────────
+function nextStep() {
+  if (stepIdx >= steps.length - 1) { stopPlay(); return; }
+  stepIdx++;
+  applyStep(steps[stepIdx]);
+  updateButtons();
+  if (stepIdx >= steps.length - 1) stopPlay();
+}
+
+function prevStep() {
+  if (stepIdx <= 0) return;
+  // Rebuild trace from scratch
+  stepIdx--;
+  totalComp = 0; totalSwap = 0; traceCount = 0;
+  document.getElementById('trace-body').innerHTML = '';
+  for (let i = 0; i <= stepIdx; i++) {
+    const s = steps[i];
+    totalComp += s.comp || 0;
+    totalSwap += s.swap || 0;
+    addTraceRow(s, i);
+  }
+  applyStep(steps[stepIdx]);
+  updateButtons();
+}
+
+function togglePlay() {
+  if (playing) stopPlay(); else startPlay();
+}
+
+function startPlay() {
+  if (stepIdx >= steps.length - 1) return;
+  playing = true;
+  document.getElementById('btn-play').textContent = '⏸ Pause';
+  playTimer = setInterval(() => {
+    nextStep();
+    if (stepIdx >= steps.length - 1) stopPlay();
+  }, getSpeed());
+}
+
+function stopPlay() {
+  playing = false;
+  clearInterval(playTimer);
+  document.getElementById('btn-play').textContent = '▶ Play';
+}
+
+function updateButtons() {
+  const hasSteps = steps.length > 0;
+  document.getElementById('btn-play').disabled = !hasSteps || stepIdx >= steps.length-1;
+  document.getElementById('btn-next').disabled = !hasSteps || stepIdx >= steps.length-1;
+  document.getElementById('btn-prev').disabled = !hasSteps || stepIdx <= 0;
+}
+
+function updateSpeed() {
+  const v = +document.getElementById('speed-slider').value;
+  document.getElementById('speed-label').textContent = speedLabels[v];
+  if (playing) { stopPlay(); startPlay(); }
+}
+
+// ─── LOAD / RANDOM / RESET ───────────────────────────────
+function loadArray() {
+  const raw = document.getElementById('num-input').value.trim();
+  const errEl = document.getElementById('input-error');
+  const inEl = document.getElementById('num-input');
+  errEl.textContent = '';
+  inEl.classList.remove('error');
+
+  if (!raw) { errEl.textContent = 'Please enter at least one number.'; inEl.classList.add('error'); return; }
+  const parts = raw.split(',').map(s => s.trim()).filter(Boolean);
+  if (parts.length > 10) { errEl.textContent = 'Maximum 10 numbers allowed.'; inEl.classList.add('error'); return; }
+  if (parts.length < 2) { errEl.textContent = 'Please enter at least 2 numbers.'; inEl.classList.add('error'); return; }
+  const nums = parts.map(Number);
+  if (nums.some(n => isNaN(n))) { errEl.textContent = 'Please enter valid numbers only.'; inEl.classList.add('error'); return; }
+  if (nums.some(n => n < 1 || n > 999)) { errEl.textContent = 'Numbers must be between 1 and 999.'; inEl.classList.add('error'); return; }
+
+  initSim(nums);
+}
+
+function randomArray() {
+  const n = Math.floor(Math.random()*5) + 5;
+  const a = Array.from({length:n}, () => Math.floor(Math.random()*90)+10);
+  document.getElementById('num-input').value = a.join(', ');
+  initSim(a);
+}
+
+function initSim(a) {
+  stopPlay();
+  arr = [...a];
+  const opt = document.getElementById('opt-check').checked;
+  steps = generateSteps(arr, opt);
+  stepIdx = -1;
+  totalComp = 0; totalSwap = 0; traceCount = 0;
+  document.getElementById('trace-body').innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:20px">Press Next or Play to begin</td></tr>';
+  document.getElementById('stat-pass').textContent = '—';
+  document.getElementById('stat-comp').textContent = '0';
+  document.getElementById('stat-swaps').textContent = '0';
+  document.getElementById('stat-status').textContent = 'Ready';
+  document.getElementById('stat-status').style.color = 'var(--text-muted)';
+  document.getElementById('explanation-box').innerHTML = '<span style="color:var(--text-muted)">Press ▶ Play or Next ▶▶ to start stepping through…</span>';
+  renderPseudo(-1,[]);
+  // Show initial bars
+  renderBars({arr:[...arr], type:'init', sorted:[], idx:null});
+  updateButtons();
+  document.getElementById('btn-play').disabled = false;
+  document.getElementById('btn-next').disabled = false;
+}
+
+function resetSim() {
+  stopPlay();
+  arr = []; steps = []; stepIdx = 0; totalComp = 0; totalSwap = 0; traceCount = 0;
+  document.getElementById('bar-container').innerHTML = '';
+  document.getElementById('trace-body').innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:20px">Load an array to see trace data</td></tr>';
+  document.getElementById('stat-pass').textContent = '—';
+  document.getElementById('stat-comp').textContent = '0';
+  document.getElementById('stat-swaps').textContent = '0';
+  document.getElementById('stat-status').textContent = 'Ready';
+  document.getElementById('stat-status').style.color = 'var(--text-muted)';
+  document.getElementById('explanation-box').innerHTML = '<span style="color:var(--text-muted)">Load an array to begin the simulation…</span>';
+  renderPseudo(-1,[]);
+  document.getElementById('btn-play').disabled = true;
+  document.getElementById('btn-next').disabled = true;
+  document.getElementById('btn-prev').disabled = true;
+}
+
+// ─── MODE ────────────────────────────────────────────────
+function setMode(m) {
+  mode = m;
+  document.getElementById('mode-beginner').classList.toggle('active', m==='beginner');
+  document.getElementById('mode-advanced').classList.toggle('active', m==='advanced');
+  if (playing) { stopPlay(); startPlay(); }
+}
+
+// ─── PAGES ───────────────────────────────────────────────
+function showPage(p) {
+  document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// ─── ASSIGNMENT ──────────────────────────────────────────
+let checked = {};
+
+function checkMC(qid, correct, btn) {
+  const selected = document.querySelector(`input[name="${qid}"]:checked`);
+  if (!selected) { alert('Please select an answer first.'); return; }
+  const opts = document.querySelectorAll(`input[name="${qid}"]`);
+  opts.forEach(o => {
+    const parent = o.closest('.mc-opt');
+    if (o.value === correct) parent.classList.add('correct');
+    else if (o.value === selected.value && o.value !== correct) parent.classList.add('wrong');
+    o.disabled = true;
+  });
+  document.getElementById('ans-'+qid).classList.add('show');
+  btn.disabled = true;
+  checked[qid] = selected.value === correct;
+}
+
+function checkFITB(qid, accepted, btn) {
+  const inp = document.getElementById(qid);
+  const val = inp.value.trim().toLowerCase();
+  const ok = accepted.map(a=>a.toLowerCase()).includes(val);
+  inp.classList.add(ok ? 'correct' : 'wrong');
+  document.getElementById('ans-'+qid).classList.add('show');
+  inp.disabled = true;
+  btn.disabled = true;
+  checked[qid] = ok;
+}
+
+function showAllAnswers() {
+  document.querySelectorAll('.answer-reveal').forEach(el => el.classList.add('show'));
+  document.querySelectorAll('.check-btn, .reveal-btn').forEach(el => el.disabled = true);
+}
+
+function resetAssign() {
+  document.querySelectorAll('.answer-reveal').forEach(el => el.classList.remove('show'));
+  document.querySelectorAll('.mc-opt').forEach(el => { el.classList.remove('correct','wrong'); });
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked = false; el.disabled = false; });
+  document.querySelectorAll('.fitb-input').forEach(el => { el.value=''; el.classList.remove('correct','wrong'); el.disabled=false; });
+  document.querySelectorAll('.check-btn').forEach(el => el.disabled = false);
+  document.getElementById('score-banner').classList.remove('show');
+  checked = {};
+}
+</script>
+</body>
+</html>
