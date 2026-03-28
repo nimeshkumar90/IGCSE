@@ -118,6 +118,7 @@
     max-width: 1400px;
     margin: 0 auto;
     padding: 24px 20px;
+    overflow-x: hidden;
   }
 
   /* INPUT PANEL */
@@ -131,6 +132,7 @@
     flex-wrap: wrap;
     gap: 16px;
     align-items: flex-end;
+    overflow: hidden;
   }
   .input-group { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 200px; }
   .input-group label {
@@ -194,9 +196,10 @@
   /* GRID */
   .sim-grid {
     display: grid;
-    grid-template-columns: 1fr 260px;
+    grid-template-columns: 1fr 340px;
     grid-template-rows: auto auto;
     gap: 16px;
+    min-width: 0;
   }
   @media (max-width: 900px) {
     .sim-grid { grid-template-columns: 1fr; }
@@ -207,6 +210,7 @@
     border: 1px solid var(--border);
     border-radius: var(--radius);
     padding: 20px;
+    min-width: 0;
   }
   .card-title {
     font-family: var(--font-heading);
@@ -347,9 +351,10 @@
   }
   .pseudo-lines {
     font-family: var(--font-code);
-    font-size: 0.75rem;
+    font-size: 0.82rem;
     line-height: 1.9;
     color: #8892b0;
+    overflow-x: auto;
   }
   .pseudo-line {
     padding: 2px 8px;
@@ -376,10 +381,11 @@
     border-radius: 8px;
     padding: 14px 16px;
     font-size: 0.88rem;
-    line-height: 1.6;
+    line-height: 1.7;
     color: var(--text);
-    min-height: 60px;
+    min-height: 80px;
   }
+  #explanation-box b { color: var(--accent); font-weight: 600; }
   #explanation-box .step-tag {
     font-family: var(--font-code);
     background: rgba(79,158,255,0.15);
@@ -396,6 +402,8 @@
   }
   .trace-table-wrap {
     overflow-x: auto;
+    overflow-y: auto;
+    max-height: 320px;
     border-radius: 8px;
     border: 1px solid var(--border);
   }
@@ -899,32 +907,32 @@ function generateSteps(a, optimised) {
   let pass = 0;
   const sorted = new Set();
 
-  s.push({type:'init', arr:[...arr2], pseudo:[0,1], explain:'Set First = 1 and Last = n. Prepare to start sorting.', pass:0, idx:null, comp:0, swap:0, swapFlag:false});
+  s.push({type:'init', arr:[...arr2], pseudo:[0,1], explain:'<b>Initialisation:</b> We set <b>First = 1</b> (start of array) and <b>Last = n</b> (end of array). These pointers define the unsorted region. Bubble Sort will repeatedly pass through this region, comparing adjacent pairs and bubbling the largest value to the right end. Nothing has moved yet — we are ready to begin.', pass:0, idx:null, comp:0, swap:0, swapFlag:false});
 
   while (last >= 1) {
     pass++;
     let didSwap = false;
-    s.push({type:'pass-start', arr:[...arr2], pseudo:[2,3], explain:`Pass ${pass} begins. Swap flag set to FALSE.`, pass, idx:null, comp:0, swap:0, swapFlag:false});
+    s.push({type:'pass-start', arr:[...arr2], pseudo:[2,3], explain:`<b>Pass ${pass} starts.</b> We reset the <b>Swap flag to FALSE</b>. This flag acts as an early-exit detector — if no swaps happen during this entire pass, the array must already be sorted. The inner loop will now walk from index 0 up to the last unsorted position (index ${last}), comparing each adjacent pair.`, pass, idx:null, comp:0, swap:0, swapFlag:false});
 
     for (let i = 0; i < last; i++) {
-      s.push({type:'compare', arr:[...arr2], pseudo:[4,5], explain:`Comparing Arr[${i}] = ${arr2[i]} and Arr[${i+1}] = ${arr2[i+1]}. Is ${arr2[i]} > ${arr2[i+1]}?`, pass, idx:i, comp:1, swap:0, swapFlag:didSwap, sorted:[...sorted]});
+      s.push({type:'compare', arr:[...arr2], pseudo:[4,5], explain:`<b>Comparing positions [${i}] and [${i+1}]:</b> The values are <b>${arr2[i]}</b> and <b>${arr2[i+1]}</b>. The condition checks: is Arr[${i}] > Arr[${i+1}]? (<b>${arr2[i]} > ${arr2[i+1]}?</b>) If YES, they are out of order and must be swapped. If NO, they are already in the right order and we move on.`, pass, idx:i, comp:1, swap:0, swapFlag:didSwap, sorted:[...sorted]});
       if (arr2[i] > arr2[i+1]) {
         let tmp = arr2[i]; arr2[i] = arr2[i+1]; arr2[i+1] = tmp;
         didSwap = true;
-        s.push({type:'swap', arr:[...arr2], pseudo:[6,7,8,9,10], explain:`Yes! ${arr2[i+1]} > ${arr2[i]}, so swap them. Temp saves the value, then values are exchanged. Swap ← TRUE.`, pass, idx:i, comp:0, swap:1, swapFlag:true, sorted:[...sorted]});
+        s.push({type:'swap', arr:[...arr2], pseudo:[6,7,8,9,10], explain:`<b>Swap!</b> Since ${arr2[i+1]} > ${arr2[i]}, these two values are out of order. A <b>Temp variable</b> stores ${arr2[i+1]} so we don't lose it. Then Arr[${i}] ← Arr[${i+1}] and Arr[${i+1}] ← Temp. The Swap flag is now set to <b>TRUE</b>, meaning at least one swap happened this pass.`, pass, idx:i, comp:0, swap:1, swapFlag:true, sorted:[...sorted]});
       } else {
-        s.push({type:'no-swap', arr:[...arr2], pseudo:[5,11], explain:`No swap needed. ${arr2[i]} ≤ ${arr2[i+1]}, so they are already in order.`, pass, idx:i, comp:0, swap:0, swapFlag:didSwap, sorted:[...sorted]});
+        s.push({type:'no-swap', arr:[...arr2], pseudo:[5,11], explain:`<b>No swap needed.</b> ${arr2[i]} ≤ ${arr2[i+1]}, so these two values are already in the correct order. We leave them in place and advance the index to the next adjacent pair.`, pass, idx:i, comp:0, swap:0, swapFlag:didSwap, sorted:[...sorted]});
       }
     }
     sorted.add(last);
     last--;
-    s.push({type:'pass-end', arr:[...arr2], pseudo:[12,13,14], explain:`End of Pass ${pass}. The largest unsorted element is now in its final position (shown in green). Last ← Last − 1.${optimised && !didSwap ? ' No swaps occurred → array is sorted! Stopping early.' : ''}`, pass, idx:null, comp:0, swap:0, swapFlag:didSwap, sorted:[...sorted]});
+    s.push({type:'pass-end', arr:[...arr2], pseudo:[12,13,14], explain:`<b>End of Pass ${pass}.</b> The largest unsorted element has now <b>bubbled</b> all the way to its correct final position (shown in green). We decrement Last (Last ← Last − 1) to shrink the unsorted region — we never need to check that position again. ${optimised && !didSwap ? '<br><b>✅ Early exit:</b> No swaps occurred during this entire pass, which proves the remaining elements are already in order. The optimised version stops here, saving unnecessary work.' : `Swap flag = ${didSwap ? 'TRUE — swaps occurred, so we must run another pass.' : 'FALSE — no swaps this pass, algorithm will terminate.'}`}`, pass, idx:null, comp:0, swap:0, swapFlag:didSwap, sorted:[...sorted]});
 
     if (optimised && !didSwap) break;
   }
   // Mark all as sorted
   for (let i = 0; i < arr2.length; i++) sorted.add(i);
-  s.push({type:'done', arr:[...arr2], pseudo:[], explain:'🎉 Array is fully sorted! All elements are in ascending order.', pass, idx:null, comp:0, swap:0, swapFlag:false, sorted:[...sorted]});
+  s.push({type:'done', arr:[...arr2], pseudo:[], explain:'<b>🎉 Sorting Complete!</b> All elements are now in ascending order (shown in green). Every adjacent pair satisfies Arr[i] ≤ Arr[i+1]. Bubble Sort has finished. You can review the full trace table below to see every comparison and swap that took place.', pass, idx:null, comp:0, swap:0, swapFlag:false, sorted:[...sorted]});
   return s;
 }
 
@@ -972,7 +980,6 @@ function addTraceRow(step, idx) {
   const placeholder = body.querySelector('td[colspan]');
   if (placeholder) body.innerHTML = '';
   body.appendChild(row);
-  row.scrollIntoView({block:'nearest'});
 }
 
 // ─── APPLY STEP ──────────────────────────────────────────
