@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Linear Search — Interactive Learning Lab</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=DM+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f1a;
+    --surface: #161929;
+    --surface2: #1e2338;
+    --border: #2a3050;
+    --text: #e2e8f8;
+    --text-muted: #8892b0;
+    --accent: #4f9eff;
+    --accent2: #7b5ea7;
+    --compare: #f59e0b;
+    --found: #22c55e;
+    --notfound: #ef4444;
+    --normal: #3b5bdb;
+    --pseudo-bg: #0d0f1a;
+    --font-code: 'JetBrains Mono', monospace;
+    --font-body: 'DM Sans', sans-serif;
+    --font-heading: 'Space Grotesk', sans-serif;
+    --radius: 10px;
+    --shadow: 0 4px 24px rgba(0,0,0,0.4);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* HEADER */
+  header {
+    background: linear-gradient(135deg, #0d0f1a 0%, #161929 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 18px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(12px);
+  }
+  .logo {
+    font-family: var(--font-heading);
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: -0.5px;
+  }
+  .logo span { color: var(--text-muted); font-weight: 400; }
+  .mode-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+  .toggle-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 4px;
+    display: flex;
+    cursor: pointer;
+  }
+  .toggle-opt {
+    padding: 4px 14px;
+    border-radius: 16px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    font-family: var(--font-heading);
+    transition: all 0.2s;
+    color: var(--text-muted);
+    cursor: pointer;
+  }
+  .toggle-opt.active { background: var(--accent); color: #fff; }
+  nav {
+    display: flex;
+    gap: 4px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 4px;
+  }
+  .nav-btn {
+    padding: 6px 16px;
+    border-radius: 6px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .nav-btn.active, .nav-btn:hover { background: var(--surface); color: var(--text); }
+  .nav-btn.active { color: var(--accent); }
+
+  .page { display: none; }
+  .page.active { display: block; }
+
+  main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 24px 20px;
+    overflow-x: hidden;
+  }
+
+  /* INPUT PANEL */
+  .input-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: flex-end;
+    overflow: hidden;
+  }
+  .input-group { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 180px; }
+  .input-group label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    font-family: var(--font-heading);
+  }
+  .input-group input {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: var(--font-code);
+    font-size: 0.9rem;
+    padding: 10px 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .input-group input:focus { border-color: var(--accent); }
+  .input-group input.error { border-color: var(--notfound); }
+  .error-msg { color: var(--notfound); font-size: 0.75rem; margin-top: 4px; min-height: 16px; }
+  .btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: #3b8fe8; }
+  .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-ghost { background: transparent; color: var(--text-muted); border: 1px solid var(--border); }
+  .btn-ghost:hover { color: var(--text); border-color: var(--text-muted); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* GRID */
+  .sim-grid {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    grid-template-rows: auto auto;
+    gap: 16px;
+    min-width: 0;
+  }
+  @media (max-width: 900px) {
+    .sim-grid { grid-template-columns: 1fr; }
+  }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    min-width: 0;
+  }
+  .card-title {
+    font-family: var(--font-heading);
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-title .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+
+  /* ARRAY VISUALIZER */
+  .visualizer-card { grid-column: 1; }
+  #array-container {
+    display: flex;
+    align-items: stretch;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+    min-height: 90px;
+  }
+  .cell-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    min-width: 52px;
+    flex: 1;
+    max-width: 80px;
+  }
+  .cell-index {
+    font-family: var(--font-code);
+    font-size: 0.68rem;
+    color: var(--text-muted);
+  }
+  .cell {
+    width: 100%;
+    min-height: 56px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-code);
+    font-size: 1rem;
+    font-weight: 700;
+    background: var(--surface2);
+    border: 2px solid var(--border);
+    transition: all 0.3s ease;
+    position: relative;
+  }
+  .cell.current {
+    background: rgba(245,158,11,0.18);
+    border-color: var(--compare);
+    color: var(--compare);
+    box-shadow: 0 0 14px rgba(245,158,11,0.35);
+    transform: translateY(-4px) scale(1.05);
+  }
+  .cell.found {
+    background: rgba(34,197,94,0.18);
+    border-color: var(--found);
+    color: var(--found);
+    box-shadow: 0 0 14px rgba(34,197,94,0.4);
+    transform: translateY(-4px) scale(1.07);
+  }
+  .cell.checked {
+    background: rgba(59,91,219,0.1);
+    border-color: rgba(59,91,219,0.4);
+    color: var(--text-muted);
+    opacity: 0.6;
+  }
+  .cell.notfound-flash {
+    background: rgba(239,68,68,0.18);
+    border-color: var(--notfound);
+    color: var(--notfound);
+  }
+  .cell-label {
+    font-family: var(--font-code);
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    min-height: 14px;
+  }
+
+  /* Pointer arrow */
+  .pointer-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+    min-height: 24px;
+  }
+  .pointer-cell {
+    min-width: 52px;
+    flex: 1;
+    max-width: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-code);
+    font-size: 0.75rem;
+    color: var(--compare);
+    font-weight: 700;
+    transition: opacity 0.2s;
+  }
+
+  /* LEGEND */
+  .legend {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-family: var(--font-heading);
+  }
+  .legend-dot { width: 12px; height: 12px; border-radius: 3px; }
+
+  /* CONTROLS */
+  .controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+  }
+  .speed-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    font-family: var(--font-heading);
+    margin-left: auto;
+  }
+  input[type="range"] { accent-color: var(--accent); width: 90px; }
+
+  /* STATS */
+  .stats-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+  }
+  .stat-pill {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 0.78rem;
+    font-family: var(--font-heading);
+    color: var(--text-muted);
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+  .stat-pill strong { color: var(--accent); font-size: 1rem; font-weight: 700; }
+
+  /* RESULT BANNER */
+  #result-banner {
+    display: none;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-top: 12px;
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+  #result-banner.found-banner {
+    background: rgba(34,197,94,0.12);
+    border: 1px solid var(--found);
+    color: var(--found);
+    display: block;
+  }
+  #result-banner.notfound-banner {
+    background: rgba(239,68,68,0.12);
+    border: 1px solid var(--notfound);
+    color: var(--notfound);
+    display: block;
+  }
+
+  /* PSEUDOCODE */
+  .pseudo-card { grid-column: 2; grid-row: 1 / 3; }
+  @media (max-width: 900px) { .pseudo-card { grid-column: 1; grid-row: auto; } }
+  .pseudo-lines {
+    font-family: var(--font-code);
+    font-size: 0.82rem;
+    line-height: 2;
+    color: #8892b0;
+    overflow-x: auto;
+  }
+  .pseudo-line {
+    padding: 2px 8px;
+    border-radius: 4px;
+    transition: all 0.2s;
+    white-space: pre;
+    display: block;
+    border-left: 3px solid transparent;
+  }
+  .pseudo-line.active {
+    background: rgba(79,158,255,0.15);
+    color: var(--text);
+    border-left-color: var(--accent);
+  }
+  .pseudo-line.executed { color: #5a6585; }
+
+  /* EXPLANATION */
+  .explanation-card { grid-column: 1; }
+  #explanation-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-size: 0.88rem;
+    line-height: 1.7;
+    color: var(--text);
+    min-height: 80px;
+  }
+  #explanation-box b { color: var(--accent); font-weight: 600; }
+  #explanation-box .step-tag {
+    font-family: var(--font-code);
+    background: rgba(79,158,255,0.15);
+    color: var(--accent);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 0.75rem;
+    margin-right: 6px;
+  }
+
+  /* TRACE TABLE */
+  .trace-section { margin-top: 20px; }
+  .trace-table-wrap {
+    overflow-x: auto;
+    overflow-y: auto;
+    max-height: 300px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--font-code);
+    font-size: 0.78rem;
+  }
+  th {
+    background: var(--surface2);
+    color: var(--text-muted);
+    padding: 8px 12px;
+    text-align: left;
+    font-weight: 600;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+  td {
+    padding: 7px 12px;
+    border-bottom: 1px solid rgba(42,48,80,0.5);
+    color: var(--text);
+    white-space: nowrap;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr.highlight-row td { background: rgba(79,158,255,0.1); }
+  tr.found-row td { background: rgba(34,197,94,0.08); }
+  tr.notfound-row td { background: rgba(239,68,68,0.08); }
+  .tag {
+    display: inline-block;
+    padding: 1px 7px;
+    border-radius: 4px;
+    font-size: 0.68rem;
+    font-weight: 700;
+  }
+  .tag-check { background: rgba(245,158,11,0.2); color: var(--compare); }
+  .tag-found { background: rgba(34,197,94,0.2); color: var(--found); }
+  .tag-notfound { background: rgba(239,68,68,0.2); color: var(--notfound); }
+  .tag-info { background: rgba(79,158,255,0.15); color: var(--accent); }
+
+  /* ASSIGNMENT PAGE */
+  .assign-header { padding: 32px 0 24px; border-bottom: 1px solid var(--border); margin-bottom: 28px; }
+  .assign-header h1 { font-family: var(--font-heading); font-size: 2rem; font-weight: 700; margin-bottom: 6px; }
+  .assign-header p { color: var(--text-muted); font-size: 0.95rem; }
+  .q-section-title {
+    font-family: var(--font-heading);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    margin: 28px 0 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+  .question-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 24px; margin-bottom: 14px; }
+  .q-number { font-family: var(--font-code); font-size: 0.7rem; color: var(--accent); font-weight: 700; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .q-text { font-size: 0.95rem; line-height: 1.6; margin-bottom: 14px; color: var(--text); }
+  .q-text code { font-family: var(--font-code); background: var(--surface2); padding: 1px 6px; border-radius: 4px; font-size: 0.85rem; }
+  .mc-options { display: flex; flex-direction: column; gap: 8px; }
+  .mc-opt {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border);
+    cursor: pointer; transition: all 0.2s; font-size: 0.88rem; background: var(--surface2);
+  }
+  .mc-opt:hover { border-color: var(--accent); }
+  .mc-opt input[type="radio"] { accent-color: var(--accent); }
+  .mc-opt.correct { border-color: var(--found); background: rgba(34,197,94,0.1); }
+  .mc-opt.wrong { border-color: var(--notfound); background: rgba(239,68,68,0.1); }
+  .fitb-input {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 6px;
+    color: var(--text); font-family: var(--font-code); font-size: 0.9rem;
+    padding: 8px 12px; outline: none; width: 180px; transition: border-color 0.2s;
+  }
+  .fitb-input:focus { border-color: var(--accent); }
+  .fitb-input.correct { border-color: var(--found); }
+  .fitb-input.wrong { border-color: var(--notfound); }
+  .check-btn {
+    padding: 8px 18px; border-radius: 6px; border: none;
+    background: var(--accent); color: #fff; font-family: var(--font-heading);
+    font-weight: 600; font-size: 0.82rem; cursor: pointer; margin-top: 12px; transition: background 0.2s;
+  }
+  .check-btn:hover { background: #3b8fe8; }
+  .check-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .answer-reveal {
+    margin-top: 10px; background: var(--surface2); border-radius: 8px;
+    padding: 12px 14px; font-size: 0.85rem; line-height: 1.6;
+    display: none; border-left: 3px solid var(--found); color: var(--text);
+  }
+  .answer-reveal.show { display: block; }
+  .assign-controls { display: flex; gap: 10px; margin-top: 20px; }
+  .score-banner {
+    background: linear-gradient(135deg, rgba(79,158,255,0.15), rgba(123,94,167,0.15));
+    border: 1px solid var(--accent); border-radius: var(--radius);
+    padding: 20px 24px; text-align: center; margin-top: 24px; display: none;
+  }
+  .score-banner.show { display: block; }
+  .score-banner h2 { font-family: var(--font-heading); font-size: 1.5rem; margin-bottom: 4px; }
+  .score-banner p { color: var(--text-muted); }
+
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  @keyframes pop { 0%{transform:scale(1)} 50%{transform:scale(1.04)} 100%{transform:scale(1)} }
+  .complete { animation: pop 0.3s ease; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+  .searching-pulse { animation: pulse 0.8s ease infinite; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">LinearSearch <span>Learning Lab</span></div>
+  <nav>
+    <button class="nav-btn active" onclick="showPage('sim', event)">🔬 Simulation</button>
+    <button class="nav-btn" onclick="showPage('assign', event)">📝 Assignment</button>
+  </nav>
+  <div class="mode-toggle">
+    Mode:
+    <div class="toggle-btn">
+      <div class="toggle-opt active" id="mode-beginner" onclick="setMode('beginner')">Beginner</div>
+      <div class="toggle-opt" id="mode-advanced" onclick="setMode('advanced')">Advanced</div>
+    </div>
+  </div>
+</header>
+
+<!-- SIMULATION PAGE -->
+<div class="page active" id="page-sim">
+<main>
+  <!-- Input Panel -->
+  <div class="input-panel">
+    <div class="input-group" style="flex:2">
+      <label>Student Names (up to 10, comma-separated)</label>
+      <input type="text" id="names-input" placeholder="e.g. Alice, Bob, Charlie, Diana, Eve" maxlength="200">
+      <div class="error-msg" id="input-error"></div>
+    </div>
+    <div class="input-group" style="flex:1;min-width:140px">
+      <label>Name to Find</label>
+      <input type="text" id="search-input" placeholder="e.g. Charlie" maxlength="40">
+      <div class="error-msg" id="search-error"></div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start;padding-top:22px">
+      <button class="btn btn-primary" onclick="loadSearch()">▶ Load</button>
+      <button class="btn btn-secondary" onclick="randomSearch()">🎲 Random</button>
+      <button class="btn btn-ghost" onclick="resetSim()">↺ Reset</button>
+    </div>
+  </div>
+
+  <!-- Sim Grid -->
+  <div class="sim-grid">
+    <!-- Visualizer -->
+    <div class="card visualizer-card">
+      <div class="card-title"><span class="dot"></span>Array Visualizer — StudentName[1..n]</div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--normal);border-radius:3px"></div>Unchecked</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--compare);border-radius:3px"></div>Checking (Counter)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--found);border-radius:3px"></div>Found ✓</div>
+        <div class="legend-item"><div class="legend-dot" style="background:rgba(59,91,219,0.4);border-radius:3px"></div>Already Checked</div>
+      </div>
+
+      <!-- Pointer row -->
+      <div class="pointer-row" id="pointer-row"></div>
+      <!-- Cells -->
+      <div id="array-container"></div>
+
+      <div id="result-banner"></div>
+
+      <div class="stats-row">
+        <div class="stat-pill">Counter <strong id="stat-counter">—</strong></div>
+        <div class="stat-pill">Comparisons <strong id="stat-comp">0</strong></div>
+        <div class="stat-pill">Found <strong id="stat-found">—</strong></div>
+        <div class="stat-pill" id="stat-status" style="color:var(--text-muted)">Ready</div>
+      </div>
+
+      <div class="controls">
+        <button class="btn btn-secondary" id="btn-prev" onclick="prevStep()" disabled>◀◀ Prev</button>
+        <button class="btn btn-primary" id="btn-play" onclick="togglePlay()" disabled>▶ Play</button>
+        <button class="btn btn-secondary" id="btn-next" onclick="nextStep()" disabled>Next ▶▶</button>
+        <div class="speed-wrap">
+          🐢 Speed 🐇
+          <input type="range" id="speed-slider" min="1" max="5" value="3" oninput="updateSpeed()">
+          <span id="speed-label">Normal</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pseudocode -->
+    <div class="card pseudo-card">
+      <div class="card-title"><span class="dot" style="background:var(--accent2)"></span>Pseudocode</div>
+      <div class="pseudo-lines" id="pseudo-display"></div>
+    </div>
+
+    <!-- Explanation -->
+    <div class="card explanation-card">
+      <div class="card-title"><span class="dot" style="background:var(--compare)"></span>Step Explanation</div>
+      <div id="explanation-box"><span style="color:var(--text-muted)">Load names and a search target to begin the simulation…</span></div>
+    </div>
+  </div>
+
+  <!-- Trace Table -->
+  <div class="trace-section">
+    <div class="card">
+      <div class="card-title"><span class="dot" style="background:var(--found)"></span>Live Trace Table</div>
+      <div class="trace-table-wrap">
+        <table id="trace-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Counter</th>
+              <th>StudentName[Counter]</th>
+              <th>Name == Target?</th>
+              <th>Found Flag</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="trace-body">
+            <tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:20px">Load names to see trace data</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>
+</div>
+
+<!-- ASSIGNMENT PAGE -->
+<div class="page" id="page-assign">
+<main>
+  <div class="assign-header">
+    <h1>📝 Linear Search Assignment</h1>
+    <p>Test your understanding with these questions on Linear Search concepts.</p>
+  </div>
+
+  <div class="q-section-title">Section A — Multiple Choice</div>
+
+  <div class="question-card">
+    <div class="q-number">Question 1 · Multiple Choice</div>
+    <div class="q-text">In Linear Search, what is the <strong>worst-case</strong> number of comparisons for a list of <code>n</code> elements?</div>
+    <div class="mc-options">
+      <label class="mc-opt"><input type="radio" name="q1" value="a"> A) 1</label>
+      <label class="mc-opt"><input type="radio" name="q1" value="b"> B) n / 2</label>
+      <label class="mc-opt"><input type="radio" name="q1" value="c"> C) n</label>
+      <label class="mc-opt"><input type="radio" name="q1" value="d"> D) n²</label>
+    </div>
+    <button class="check-btn" onclick="checkMC('q1','c',this)">Check Answer</button>
+    <div class="answer-reveal" id="ans-q1">✅ <strong>C — n comparisons.</strong> In the worst case the target is the last element, or not in the list at all. Every element must be compared, giving O(n) comparisons.</div>
+  </div>
+
+  <div class="question-card">
+    <div class="q-number">Question 2 · Multiple Choice</div>
+    <div class="q-text">What is the purpose of the <code>Found ← FALSE</code> flag at the start of the algorithm?</div>
+    <div class="mc-options">
+      <label class="mc-opt"><input type="radio" name="q2" value="a"> A) To store the index of the found item</label>
+      <label class="mc-opt"><input type="radio" name="q2" value="b"> B) To indicate no match has been found yet; it becomes TRUE when a match is found</label>
+      <label class="mc-opt"><input type="radio" name="q2" value="c"> C) To count the number of comparisons</label>
+      <label class="mc-opt"><input type="radio" name="q2" value="d"> D) To store the target name</label>
+    </div>
+    <button class="check-btn" onclick="checkMC('q2','b',this)">Check Answer</button>
+    <div class="answer-reveal" id="ans-q2">✅ <strong>B.</strong> The Found flag is a Boolean variable initialised to FALSE. When the target is matched, Found ← TRUE. This also helps the UNTIL condition stop the loop early.</div>
+  </div>
+
+  <div class="question-card">
+    <div class="q-number">Question 3 · Multiple Choice</div>
+    <div class="q-text">The loop in this Linear Search uses <code>UNTIL Found OR Counter > ClassSize</code>. What does this condition guarantee?</div>
+    <div class="mc-options">
+      <label class="mc-opt"><input type="radio" name="q3" value="a"> A) The loop always runs exactly ClassSize times</label>
+      <label class="mc-opt"><input type="radio" name="q3" value="b"> B) The loop stops as soon as the name is found OR the whole list has been searched</label>
+      <label class="mc-opt"><input type="radio" name="q3" value="c"> C) The loop runs only if Found is TRUE</label>
+      <label class="mc-opt"><input type="radio" name="q3" value="d"> D) The loop restarts when Counter exceeds ClassSize</label>
+    </div>
+    <button class="check-btn" onclick="checkMC('q3','b',this)">Check Answer</button>
+    <div class="answer-reveal" id="ans-q3">✅ <strong>B.</strong> The OR condition provides two exit routes: early exit when a match is found (Found = TRUE), or natural termination after every element has been checked (Counter > ClassSize).</div>
+  </div>
+
+  <div class="question-card">
+    <div class="q-number">Question 4 · Multiple Choice</div>
+    <div class="q-text">Does Linear Search require the list to be <strong>sorted</strong> before searching?</div>
+    <div class="mc-options">
+      <label class="mc-opt"><input type="radio" name="q4" value="a"> A) Yes, always</label>
+      <label class="mc-opt"><input type="radio" name="q4" value="b"> B) Only if the list has more than 10 elements</label>
+      <label class="mc-opt"><input type="radio" name="q4" value="c"> C) No — it works on any order</label>
+      <label class="mc-opt"><input type="radio" name="q4" value="d"> D) Yes, but only in descending order</label>
+    </div>
+    <button class="check-btn" onclick="checkMC('q4','c',this)">Check Answer</button>
+    <div class="answer-reveal" id="ans-q4">✅ <strong>C — No sorting required.</strong> This is a key advantage over Binary Search. Linear Search checks every element in sequence and works on any unsorted or sorted list.</div>
+  </div>
+
+  <div class="question-card">
+    <div class="q-number">Question 5 · Multiple Choice</div>
+    <div class="q-text">In the <strong>best case</strong>, Linear Search finds the target after how many comparisons?</div>
+    <div class="mc-options">
+      <label class="mc-opt"><input type="radio" name="q5" value="a"> A) 0</label>
+      <label class="mc-opt"><input type="radio" name="q5" value="b"> B) 1</label>
+      <label class="mc-opt"><input type="radio" name="q5" value="c"> C) n/2</label>
+      <label class="mc-opt"><input type="radio" name="q5" value="d"> D) n</label>
+    </div>
+    <button class="check-btn" onclick="checkMC('q5','b',this)">Check Answer</button>
+    <div class="answer-reveal" id="ans-q5">✅ <strong>B — 1 comparison.</strong> The best case is when the target is the very first element in the list. The condition matches immediately, Found ← TRUE, and the loop exits after a single check.</div>
+  </div>
+
+  <div class="q-section-title">Section B — Fill in the Blank</div>
+
+  <div class="question-card">
+    <div class="q-number">Question 6 · Fill in the Blank</div>
+    <div class="q-text">In the pseudocode, the variable <code>Counter</code> is initialised to <input class="fitb-input" id="q6" placeholder="your answer"> before the REPEAT loop begins.</div>
+    <button class="check-btn" onclick="checkFITB('q6',['1'],this)">Check</button>
+    <div class="answer-reveal" id="ans-q6">✅ <strong>1.</strong> Counter starts at 1 (the first index of the array) and is incremented by 1 each iteration to walk through the list.</div>
+  </div>
+
+  <div class="question-card">
+    <div class="q-number">Question 7 · Fill in the Blank</div>
+    <div class="q-text">When the name is found, the algorithm outputs the name followed by <code>" found at position "</code> and then the value of <input class="fitb-input" id="q7" placeholder="variable name">.</div>
+    <button class="check-btn" onclick="checkFITB('q7',['counter','Counter'],this)">Check</button>
+    <div class="answer-reveal" id="ans-q7">✅ <strong>Counter.</strong> The output is: Name, " found at position ", Counter, " in the list." — Counter holds the 1-based index position where the match was found.</div>
+  </div>
+
+  <div class="question-card">
+    <div class="q-number">Question 8 · Fill in the Blank</div>
+    <div class="q-text">If the name is <strong>not</strong> found after searching the whole list, the algorithm outputs: Name, <input class="fitb-input" id="q8" placeholder="output message" style="width:220px">.</div>
+    <button class="check-btn" onclick="checkFITB('q8',['" not found."','not found','&quot; not found.&quot;'],this)">Check</button>
+    <div class="answer-reveal" id="ans-q8">✅ <strong>" not found."</strong> The ELSE branch executes when Found is still FALSE after the loop, outputting Name followed by " not found."</div>
+  </div>
+
+  <div class="q-section-title">Section C — Trace Questions</div>
+
+  <div class="question-card">
+    <div class="q-number">Question 9 · Trace</div>
+    <div class="q-text">
+      The list is <code>["Alice", "Bob", "Charlie", "Diana"]</code> and the target is <code>"Charlie"</code>.<br><br>
+      How many comparisons are made before the algorithm finds the name and sets Found ← TRUE?
+      <br><br>
+      <input class="fitb-input" id="q9" placeholder="Number of comparisons">
+    </div>
+    <button class="check-btn" onclick="checkFITB('q9',['3'],this)">Check</button>
+    <div class="answer-reveal" id="ans-q9">
+      ✅ <strong>3 comparisons.</strong><br>
+      Counter=1: "Alice" = "Charlie"? → No → Counter ← 2<br>
+      Counter=2: "Bob" = "Charlie"? → No → Counter ← 3<br>
+      Counter=3: "Charlie" = "Charlie"? → Yes → Found ← TRUE, loop exits<br>
+      Total = <strong>3 comparisons</strong>.
+    </div>
+  </div>
+
+  <div class="question-card">
+    <div class="q-number">Question 10 · Trace</div>
+    <div class="q-text">
+      The list is <code>["Alice", "Bob", "Charlie", "Diana"]</code> (ClassSize = 4) and the target is <code>"Eve"</code>.<br><br>
+      How many comparisons are made in total, and what is the final output?
+      <br><br>
+      Comparisons: <input class="fitb-input" id="q10a" placeholder="number" style="width:80px">
+      &nbsp; Output: <input class="fitb-input" id="q10b" placeholder="found / not found" style="width:160px">
+    </div>
+    <button class="check-btn" onclick="checkBoth('q10a','4','q10b',['not found','Eve not found'],this)">Check</button>
+    <div class="answer-reveal" id="ans-q10">
+      ✅ <strong>4 comparisons, output: "Eve not found."</strong><br>
+      All 4 names are checked, none match "Eve". Counter becomes 5, which is > ClassSize (4), so the loop exits with Found still FALSE. The ELSE branch outputs "Eve not found."
+    </div>
+  </div>
+
+  <div class="assign-controls">
+    <button class="btn btn-primary" onclick="showAllAnswers()">📖 Reveal All Answers</button>
+    <button class="btn btn-ghost" onclick="resetAssign()">↺ Reset Assignment</button>
+  </div>
+  <div class="score-banner" id="score-banner">
+    <h2 id="score-text">🎉 Well done!</h2>
+    <p id="score-sub">Keep practising to master Linear Search.</p>
+  </div>
+</main>
+</div>
+
+<script>
+// ─── STATE ───────────────────────────────────────────────
+let names = [];
+let target = '';
+let steps = [];
+let stepIdx = -1;
+let playing = false;
+let playTimer = null;
+let mode = 'beginner';
+let totalComp = 0;
+let traceCount = 0;
+
+const speedMap = {1:1800, 2:1000, 3:550, 4:270, 5:110};
+const speedLabels = {1:'Slowest',2:'Slow',3:'Normal',4:'Fast',5:'Fastest'};
+function getSpeed() {
+  const v = +document.getElementById('speed-slider').value;
+  return mode === 'beginner' ? speedMap[Math.max(1,v-1)] : speedMap[v];
+}
+
+// ─── PSEUDOCODE ──────────────────────────────────────────
+const pseudoLines = [
+  {id:0,  text:'OUTPUT "Please enter name to find "'},
+  {id:1,  text:'INPUT Name'},
+  {id:2,  text:'Found ← FALSE'},
+  {id:3,  text:'Counter ← 1'},
+  {id:4,  text:'REPEAT'},
+  {id:5,  text:'   IF Name = StudentName[Counter]'},
+  {id:6,  text:'      THEN'},
+  {id:7,  text:'         Found ← TRUE'},
+  {id:8,  text:'      ELSE'},
+  {id:9,  text:'         Counter ← Counter + 1'},
+  {id:10, text:'   ENDIF'},
+  {id:11, text:'UNTIL Found OR Counter > ClassSize'},
+  {id:12, text:'IF Found'},
+  {id:13, text:'   THEN'},
+  {id:14, text:'      OUTPUT Name, " found at"'},
+  {id:15, text:'             position ", Counter'},
+  {id:16, text:'   ELSE'},
+  {id:17, text:'      OUTPUT Name, " not found."'},
+  {id:18, text:'ENDIF'},
+];
+
+function renderPseudo(activeLines=[], executedLines=[]) {
+  const el = document.getElementById('pseudo-display');
+  el.innerHTML = pseudoLines.map(l => {
+    let cls = 'pseudo-line';
+    if (activeLines.includes(l.id)) cls += ' active';
+    else if (executedLines.includes(l.id)) cls += ' executed';
+    return `<span class="${cls}">${l.text}</span>`;
+  }).join('');
+}
+renderPseudo();
+
+// ─── STEP GENERATOR ──────────────────────────────────────
+function generateSteps(nameArr, searchTarget) {
+  const s = [];
+  const classSize = nameArr.length;
+
+  s.push({
+    type: 'init',
+    pseudo: [0,1,2,3],
+    executed: [],
+    counter: null,
+    found: false,
+    explain: `<b>Initialisation:</b> The user inputs the name to find: <b>"${searchTarget}"</b>. We set <b>Found ← FALSE</b> (no match yet) and <b>Counter ← 1</b> (start at the first position in the list). ClassSize = ${classSize}. The REPEAT loop is about to begin.`,
+    comp: 0
+  });
+
+  let counter = 1;
+  let found = false;
+  const executed = [0,1,2,3];
+
+  while (true) {
+    const current = nameArr[counter-1];
+    const match = current === searchTarget;
+
+    s.push({
+      type: 'compare',
+      pseudo: [4,5],
+      executed: [...executed],
+      counter,
+      found: false,
+      currentName: current,
+      explain: `<b>Checking position ${counter}:</b> StudentName[${counter}] = <b>"${current}"</b>. Is <b>"${searchTarget}"</b> = <b>"${current}"</b>? → <b>${match ? 'YES — match found!' : 'NO — not a match.'}</b>${!match ? ` Counter will move to the next position.` : ''}`,
+      comp: 1
+    });
+    executed.push(4,5);
+
+    if (match) {
+      found = true;
+      s.push({
+        type: 'found',
+        pseudo: [6,7,11],
+        executed: [...executed],
+        counter,
+        found: true,
+        currentName: current,
+        explain: `<b>Match found!</b> <b>"${searchTarget}"</b> equals StudentName[${counter}] = <b>"${current}"</b>. We set <b>Found ← TRUE</b>. The UNTIL condition (Found OR Counter > ClassSize) is now TRUE, so the loop exits immediately. The search is complete at position ${counter}.`,
+        comp: 0
+      });
+      executed.push(6,7,11);
+      break;
+    } else {
+      executed.push(8,9,10);
+      counter++;
+      s.push({
+        type: 'increment',
+        pseudo: [8,9,10,11],
+        executed: [...executed],
+        counter,
+        found: false,
+        currentName: current,
+        explain: `<b>No match — Counter incremented.</b> <b>"${searchTarget}"</b> ≠ <b>"${current}"</b>, so we go to the ELSE branch: <b>Counter ← Counter + 1</b> (now Counter = ${counter}). Check UNTIL condition: Found = FALSE, Counter (${counter}) ${counter > classSize ? '>' : '≤'} ClassSize (${classSize}) → ${counter > classSize ? 'loop exits (exhausted list)' : 'continue loop'}.`,
+        comp: 0
+      });
+
+      if (counter > classSize) {
+        s.push({
+          type: 'notfound',
+          pseudo: [12,16,17,18],
+          executed: [...executed],
+          counter,
+          found: false,
+          currentName: null,
+          explain: `<b>Not Found.</b> Counter (${counter}) > ClassSize (${classSize}), so the UNTIL condition is TRUE and the loop has ended. Found is still <b>FALSE</b>. The IF Found check goes to the <b>ELSE branch</b>: OUTPUT <b>"${searchTarget} not found."</b> The name does not exist in the list.`,
+          comp: 0
+        });
+        break;
+      }
+    }
+  }
+
+  if (found) {
+    const pos = steps.length; // doesn't matter, we use counter from found step
+    const foundStep = s.find(x => x.type === 'found');
+    s.push({
+      type: 'output-found',
+      pseudo: [12,13,14,15,18],
+      executed: [...executed, 12,13,14,15,18],
+      counter: foundStep ? foundStep.counter : counter,
+      found: true,
+      explain: `<b>Output:</b> Since Found = TRUE, we execute the THEN branch. The program outputs: <b>"${searchTarget} found at position ${foundStep ? foundStep.counter : counter} in the list."</b> Linear Search is complete.`,
+      comp: 0
+    });
+  }
+
+  return s;
+}
+
+// ─── RENDER ARRAY ────────────────────────────────────────
+function renderArray(step) {
+  const container = document.getElementById('array-container');
+  const pointerRow = document.getElementById('pointer-row');
+  if (!names.length) { container.innerHTML=''; pointerRow.innerHTML=''; return; }
+
+  const activeIdx = step && step.counter != null ? step.counter - 1 : -1;
+
+  // Pointer row
+  pointerRow.innerHTML = names.map((_, i) => {
+    const show = i === activeIdx && step && (step.type === 'compare');
+    return `<div class="pointer-cell" style="opacity:${show?1:0}">${show ? '▼' : ''}</div>`;
+  }).join('');
+
+  // Cells
+  container.innerHTML = names.map((name, i) => {
+    let cls = 'cell';
+    if (step) {
+      if (step.type === 'found' || step.type === 'output-found') {
+        if (i === step.counter - 1) cls += ' found';
+        else if (i < step.counter - 1) cls += ' checked';
+      } else if (step.type === 'notfound') {
+        cls += ' notfound-flash';
+      } else if (step.type === 'compare' && i === activeIdx) {
+        cls += ' current';
+      } else if (step.counter != null && i < activeIdx) {
+        cls += ' checked';
+      }
+    }
+    return `<div class="cell-wrap">
+      <div class="cell-index">[${i+1}]</div>
+      <div class="${cls}">${name}</div>
+      <div class="cell-label">${step && step.type === 'found' && i === step.counter-1 ? '✓' : ''}</div>
+    </div>`;
+  }).join('');
+}
+
+// ─── APPLY STEP ──────────────────────────────────────────
+function applyStep(step) {
+  renderArray(step);
+  renderPseudo(step.pseudo || [], step.executed || []);
+
+  const exBox = document.getElementById('explanation-box');
+  const tagMap = {compare:'COMPARE', found:'FOUND', notfound:'NOT FOUND', increment:'INCREMENT', init:'INIT', 'output-found':'OUTPUT'};
+  const tag = tagMap[step.type] || 'INFO';
+  exBox.innerHTML = `<span class="step-tag">${tag}</span>${step.explain}`;
+
+  totalComp += step.comp || 0;
+  document.getElementById('stat-counter').textContent = step.counter != null ? step.counter : '—';
+  document.getElementById('stat-comp').textContent = totalComp;
+  document.getElementById('stat-found').textContent = step.found ? 'TRUE ✓' : 'FALSE';
+  document.getElementById('stat-found').style.color = step.found ? 'var(--found)' : 'var(--text-muted)';
+
+  const status = document.getElementById('stat-status');
+  if (step.type === 'output-found') { status.textContent = '✅ Found'; status.style.color = 'var(--found)'; }
+  else if (step.type === 'notfound') { status.textContent = '❌ Not Found'; status.style.color = 'var(--notfound)'; }
+  else { status.textContent = `Step ${stepIdx+1} / ${steps.length}`; status.style.color = 'var(--text-muted)'; }
+
+  // Result banner
+  const banner = document.getElementById('result-banner');
+  if (step.type === 'output-found') {
+    banner.className = 'found-banner';
+    banner.textContent = `✅ "${target}" found at position ${step.counter} in the list.`;
+  } else if (step.type === 'notfound') {
+    banner.className = 'notfound-banner';
+    banner.textContent = `❌ "${target}" not found.`;
+  } else {
+    banner.style.display = 'none';
+    banner.className = '';
+  }
+
+  addTraceRow(step);
+}
+
+// ─── TRACE TABLE ─────────────────────────────────────────
+function addTraceRow(step) {
+  if (step.type === 'init') return; // skip init from trace
+  traceCount++;
+  const body = document.getElementById('trace-body');
+  const placeholder = body.querySelector('td[colspan]');
+  if (placeholder) body.innerHTML = '';
+
+  let tag = '', action = '', match = '—';
+  if (step.type === 'compare') {
+    tag = `<span class="tag tag-check">Check</span>`;
+    action = `Compare "${target}" vs "${step.currentName}"`;
+    match = step.currentName === target ? '<span style="color:var(--found)">YES ✓</span>' : '<span style="color:var(--notfound)">NO ✗</span>';
+  } else if (step.type === 'found') {
+    tag = `<span class="tag tag-found">Found</span>`;
+    action = `Found ← TRUE`;
+    match = '<span style="color:var(--found)">YES ✓</span>';
+  } else if (step.type === 'increment') {
+    tag = `<span class="tag tag-info">Step</span>`;
+    action = `Counter ← ${step.counter}`;
+    match = '<span style="color:var(--notfound)">NO ✗</span>';
+  } else if (step.type === 'notfound') {
+    tag = `<span class="tag tag-notfound">Done</span>`;
+    action = `Not found — loop exits`;
+  } else if (step.type === 'output-found') {
+    tag = `<span class="tag tag-found">Output</span>`;
+    action = `"${target} found at position ${step.counter}"`;
+  }
+
+  const row = document.createElement('tr');
+  if (step.type === 'found' || step.type === 'output-found') row.classList.add('found-row');
+  if (step.type === 'notfound') row.classList.add('notfound-row');
+  if (stepIdx === steps.indexOf(step) || traceCount === stepIdx) row.classList.add('highlight-row');
+
+  const name = step.counter && names[step.counter-1] ? names[step.counter-1] : '—';
+  row.innerHTML = `<td>${traceCount}</td><td>${step.counter != null ? step.counter : '—'}</td><td style="font-family:var(--font-code)">${step.type !== 'output-found' && step.type !== 'notfound' ? name : '—'}</td><td>${match}</td><td style="color:${step.found?'var(--found)':'var(--text-muted)'}">${step.found ? 'TRUE' : 'FALSE'}</td><td>${tag} ${action}</td>`;
+  body.appendChild(row);
+}
+
+// ─── CONTROLS ────────────────────────────────────────────
+function nextStep() {
+  if (stepIdx >= steps.length - 1) { stopPlay(); return; }
+  stepIdx++;
+  applyStep(steps[stepIdx]);
+  updateButtons();
+  if (stepIdx >= steps.length - 1) stopPlay();
+}
+
+function prevStep() {
+  if (stepIdx <= 0) return;
+  stepIdx--;
+  totalComp = 0; traceCount = 0;
+  document.getElementById('trace-body').innerHTML = '';
+  document.getElementById('result-banner').style.display = 'none';
+  document.getElementById('result-banner').className = '';
+  for (let i = 0; i <= stepIdx; i++) {
+    const s = steps[i];
+    totalComp += s.comp || 0;
+    if (s.type !== 'init') addTraceRow(s);
+  }
+  applyStep(steps[stepIdx]);
+  updateButtons();
+}
+
+function togglePlay() {
+  if (playing) stopPlay(); else startPlay();
+}
+function startPlay() {
+  if (stepIdx >= steps.length - 1) return;
+  playing = true;
+  document.getElementById('btn-play').textContent = '⏸ Pause';
+  playTimer = setInterval(() => {
+    nextStep();
+    if (stepIdx >= steps.length - 1) stopPlay();
+  }, getSpeed());
+}
+function stopPlay() {
+  playing = false;
+  clearInterval(playTimer);
+  document.getElementById('btn-play').textContent = '▶ Play';
+}
+function updateButtons() {
+  const has = steps.length > 0;
+  document.getElementById('btn-play').disabled = !has || stepIdx >= steps.length-1;
+  document.getElementById('btn-next').disabled = !has || stepIdx >= steps.length-1;
+  document.getElementById('btn-prev').disabled = !has || stepIdx <= 0;
+}
+function updateSpeed() {
+  const v = +document.getElementById('speed-slider').value;
+  document.getElementById('speed-label').textContent = speedLabels[v];
+  if (playing) { stopPlay(); startPlay(); }
+}
+
+// ─── LOAD / RANDOM / RESET ───────────────────────────────
+function loadSearch() {
+  const rawNames = document.getElementById('names-input').value.trim();
+  const rawTarget = document.getElementById('search-input').value.trim();
+  const errEl = document.getElementById('input-error');
+  const searchErr = document.getElementById('search-error');
+  errEl.textContent = ''; searchErr.textContent = '';
+  document.getElementById('names-input').classList.remove('error');
+  document.getElementById('search-input').classList.remove('error');
+
+  if (!rawNames) { errEl.textContent = 'Please enter at least one name.'; document.getElementById('names-input').classList.add('error'); return; }
+  const parts = rawNames.split(',').map(s => s.trim()).filter(Boolean);
+  if (parts.length > 10) { errEl.textContent = 'Maximum 10 names allowed.'; document.getElementById('names-input').classList.add('error'); return; }
+  if (parts.length < 2) { errEl.textContent = 'Please enter at least 2 names.'; document.getElementById('names-input').classList.add('error'); return; }
+  if (!rawTarget) { searchErr.textContent = 'Please enter a name to search for.'; document.getElementById('search-input').classList.add('error'); return; }
+
+  initSim(parts, rawTarget);
+}
+
+function randomSearch() {
+  const pool = ['Alice','Bob','Charlie','Diana','Eve','Frank','Grace','Harry','Isla','James','Kate','Liam','Maya','Noah'];
+  const n = Math.floor(Math.random()*5) + 4;
+  const shuffled = pool.sort(() => Math.random()-0.5).slice(0, n);
+  // 70% chance target is in list, 30% not found
+  const inList = Math.random() < 0.7;
+  const tgt = inList ? shuffled[Math.floor(Math.random()*shuffled.length)] : pool.find(p => !shuffled.includes(p)) || 'Zara';
+  document.getElementById('names-input').value = shuffled.join(', ');
+  document.getElementById('search-input').value = tgt;
+  initSim(shuffled, tgt);
+}
+
+function initSim(nameArr, searchTarget) {
+  stopPlay();
+  names = [...nameArr];
+  target = searchTarget;
+  steps = generateSteps(names, target);
+  stepIdx = -1;
+  totalComp = 0; traceCount = 0;
+
+  document.getElementById('trace-body').innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:20px">Press Next or Play to begin</td></tr>';
+  document.getElementById('stat-counter').textContent = '—';
+  document.getElementById('stat-comp').textContent = '0';
+  document.getElementById('stat-found').textContent = 'FALSE';
+  document.getElementById('stat-found').style.color = 'var(--text-muted)';
+  document.getElementById('stat-status').textContent = 'Ready';
+  document.getElementById('stat-status').style.color = 'var(--text-muted)';
+  document.getElementById('explanation-box').innerHTML = `<span style="color:var(--text-muted)">Searching for <b style="color:var(--accent)">"${target}"</b> in [${names.join(', ')}]. Press ▶ Play or Next ▶▶ to begin stepping…</span>`;
+  document.getElementById('result-banner').style.display = 'none';
+  document.getElementById('result-banner').className = '';
+  renderPseudo();
+  renderArray(null);
+  document.getElementById('pointer-row').innerHTML = names.map(() => `<div class="pointer-cell" style="opacity:0"></div>`).join('');
+  updateButtons();
+  document.getElementById('btn-play').disabled = false;
+  document.getElementById('btn-next').disabled = false;
+}
+
+function resetSim() {
+  stopPlay();
+  names = []; target = ''; steps = []; stepIdx = -1; totalComp = 0; traceCount = 0;
+  document.getElementById('array-container').innerHTML = '';
+  document.getElementById('pointer-row').innerHTML = '';
+  document.getElementById('trace-body').innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:20px">Load names to see trace data</td></tr>';
+  document.getElementById('stat-counter').textContent = '—';
+  document.getElementById('stat-comp').textContent = '0';
+  document.getElementById('stat-found').textContent = '—';
+  document.getElementById('stat-status').textContent = 'Ready';
+  document.getElementById('result-banner').style.display = 'none';
+  document.getElementById('result-banner').className = '';
+  document.getElementById('explanation-box').innerHTML = '<span style="color:var(--text-muted)">Load names to begin the simulation…</span>';
+  renderPseudo();
+  document.getElementById('btn-play').disabled = true;
+  document.getElementById('btn-next').disabled = true;
+  document.getElementById('btn-prev').disabled = true;
+}
+
+// ─── MODE ────────────────────────────────────────────────
+function setMode(m) {
+  mode = m;
+  document.getElementById('mode-beginner').classList.toggle('active', m==='beginner');
+  document.getElementById('mode-advanced').classList.toggle('active', m==='advanced');
+  if (playing) { stopPlay(); startPlay(); }
+}
+
+// ─── PAGES ───────────────────────────────────────────────
+function showPage(p, e) {
+  document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  if (e && e.target) e.target.classList.add('active');
+}
+
+// ─── ASSIGNMENT ──────────────────────────────────────────
+let checked = {};
+function checkMC(qid, correct, btn) {
+  const selected = document.querySelector(`input[name="${qid}"]:checked`);
+  if (!selected) { alert('Please select an answer first.'); return; }
+  document.querySelectorAll(`input[name="${qid}"]`).forEach(o => {
+    const parent = o.closest('.mc-opt');
+    if (o.value === correct) parent.classList.add('correct');
+    else if (o.value === selected.value && o.value !== correct) parent.classList.add('wrong');
+    o.disabled = true;
+  });
+  document.getElementById('ans-'+qid).classList.add('show');
+  btn.disabled = true;
+  checked[qid] = selected.value === correct;
+}
+function checkFITB(qid, accepted, btn) {
+  const inp = document.getElementById(qid);
+  const val = inp.value.trim().toLowerCase();
+  const ok = accepted.map(a=>a.toLowerCase()).includes(val);
+  inp.classList.add(ok ? 'correct' : 'wrong');
+  document.getElementById('ans-'+qid).classList.add('show');
+  inp.disabled = true; btn.disabled = true;
+  checked[qid] = ok;
+}
+function checkBoth(qid1, correct1, qid2, accepted2, btn) {
+  const inp1 = document.getElementById(qid1);
+  const inp2 = document.getElementById(qid2);
+  const ok1 = inp1.value.trim() === correct1;
+  const ok2 = accepted2.map(a=>a.toLowerCase()).includes(inp2.value.trim().toLowerCase());
+  inp1.classList.add(ok1 ? 'correct' : 'wrong');
+  inp2.classList.add(ok2 ? 'correct' : 'wrong');
+  document.getElementById('ans-q10').classList.add('show');
+  inp1.disabled = true; inp2.disabled = true; btn.disabled = true;
+  checked['q10'] = ok1 && ok2;
+}
+function showAllAnswers() {
+  document.querySelectorAll('.answer-reveal').forEach(el => el.classList.add('show'));
+  document.querySelectorAll('.check-btn').forEach(el => el.disabled = true);
+}
+function resetAssign() {
+  document.querySelectorAll('.answer-reveal').forEach(el => el.classList.remove('show'));
+  document.querySelectorAll('.mc-opt').forEach(el => el.classList.remove('correct','wrong'));
+  document.querySelectorAll('input[type="radio"]').forEach(el => { el.checked=false; el.disabled=false; });
+  document.querySelectorAll('.fitb-input').forEach(el => { el.value=''; el.classList.remove('correct','wrong'); el.disabled=false; });
+  document.querySelectorAll('.check-btn').forEach(el => el.disabled=false);
+  document.getElementById('score-banner').classList.remove('show');
+  checked = {};
+}
+</script>
+</body>
+</html>
